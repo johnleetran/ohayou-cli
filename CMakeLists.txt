@@ -5,6 +5,11 @@ project(ohayou-cli VERSION 0.1)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if(CMAKE_BUILD_TYPE MATCHES Release)
+    message("optimize code")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+endif()
+
 #third-party deps
 find_package(OpenCV 4.5.1 REQUIRED)
 find_package(harfbuzz CONFIG REQUIRED)
