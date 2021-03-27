@@ -10,11 +10,14 @@ using namespace cv;
 using namespace std;
 namespace ohayou
 {
-    //does not work, not sure how to implement using LUT
-    cv::Mat exponential_function(Mat img, float exp)
-    {
-        std::vector<int> table;
-        return img;
+    cv::Mat exponential_function(Mat channel, float exp)
+    {   
+        Mat table(1, 256, CV_8U);
+        for(int i=0; i<256; i++){
+            table.at<uchar>(i) = std::min((int)std::pow(i, exp), 255);
+        }
+        cv::LUT(channel, table, channel);
+        return channel;
     }
 
     cv::Mat tone(Mat img, int number, float exp)
@@ -23,7 +26,7 @@ namespace ohayou
         cv::split(img, planes);
         for(int i=0; i<3; i++){
             if(i == number){
-                planes[i] *= exp;//exponential_function(planes[i], exp);
+                planes[i] = exponential_function(planes[i], exp);
             }else{
                 planes[i] *= 0;
             }
@@ -33,9 +36,9 @@ namespace ohayou
         return out;
     }
 
-    cv::Mat apply_duo_tone(Mat img, int channel_number)
+    cv::Mat apply_duo_tone(Mat img, int channel_number, float exp = 1.05)
     {
-        cv::Mat output_img = tone(img, channel_number, 1.05);
+        cv::Mat output_img = tone(img, channel_number, exp);
 
         return output_img;
     }

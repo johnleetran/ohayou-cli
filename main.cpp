@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
     //                                         cv::Scalar(315, 255, 255));
 
     //second parameter to 0 for blue, 1 for green and 2 for red screen
-    Mat output_image = ohayou::apply_duo_tone(img, 1);
+    Mat output_image = ohayou::apply_duo_tone(img, 1, 1.05);
     imshow("Display window", output_image);
     (void) waitKey(0); // Wait for a keystroke in the window
 
