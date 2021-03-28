@@ -18,9 +18,9 @@ namespace ohayou
          return kernal;
     }
 
-    cv::Mat apply_sepia(Mat img)
+    cv::Mat apply_sepia(Mat img, float intensity = 1.0)
     {
-        cv::Mat kernal = getSepiaKernal();
+        cv::Mat kernal = getSepiaKernal() * intensity;
         cv::Mat output_img;
         cv::transform(img, output_img, kernal);
         return output_img;

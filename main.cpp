@@ -17,14 +17,25 @@
 
 using namespace cv;
 using namespace std;
-const int slider_max = 100;
+const int slider_max = 200;
 int slider = 3;
 Mat src1;
 
 void on_trackbar(int x, void *data)
 {
-    Mat dst = ohayou::horizontal_motion_blur(src1, x);
-    imshow("image", dst);
+    int val = x;
+    // Mat output_image = ohayou::average_blur(src1, 9);
+    // Mat output_image = ohayou::gaussian_blur(src1, 9);
+    // Mat output_image = ohayou::horizontal_motion_blur(src1, val);
+    // Mat output_image = ohayou::apply_sepia(src1, val/100.0);
+    // Mat output_image = ohayou::apply_splash(src1,
+    //                                         cv::Scalar(155, 30, 30),
+    //                                         cv::Scalar(315, 255, 255));
+
+    Mat output_image = ohayou::apply_duo_tone(src1, 1, 1 + val / 100.0);
+    //Mat output_image = ohayou::horizontal_motion_blur(img, val);
+
+    imshow("image", output_image);
 }
 
 void brightness(Mat& img)
@@ -33,17 +44,6 @@ void brightness(Mat& img)
     cv::createTrackbar("val", "image", &slider, slider_max, on_trackbar);
 
     float val = cv::getTrackbarPos("val", "image");
-    // Mat output_image = ohayou::average_blur(img, 9);
-    // Mat output_image = ohayou::gaussian_blur(img, 9);
-    // Mat output_image = ohayou::horizontal_motion_blur(img, 21);
-    // Mat output_image = ohayou::apply_sepia(img);
-    // Mat output_image = ohayou::apply_splash(img,
-    //                                         cv::Scalar(155, 30, 30),
-    //                                         cv::Scalar(315, 255, 255));
-
-    // Mat output_image = ohayou::apply_duo_tone(img, 1, 1.05);
-    Mat output_image = ohayou::horizontal_motion_blur(img, val);
-
     on_trackbar(val, 0);
 
     cv::waitKey(0);
