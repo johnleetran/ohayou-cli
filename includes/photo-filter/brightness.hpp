@@ -36,7 +36,7 @@ namespace ohayou
         return output_img;
     }
 
-    cv::Mat apply_brightness(Mat img, float level)
+    cv::Mat apply_brightness(Mat img, float level = 0.0)
     {
         cv::Mat output_img;
         cv::convertScaleAbs(img, output_img, 1.0, level);

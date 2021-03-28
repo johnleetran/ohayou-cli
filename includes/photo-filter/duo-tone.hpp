@@ -20,7 +20,7 @@ namespace ohayou
         return channel;
     }
 
-    cv::Mat tone(Mat img, int number, float exp)
+    cv::Mat tone(Mat img, int number, float exp = 1.05)
     {
         Mat channels[3];
         cv::split(img, channels);

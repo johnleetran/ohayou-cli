@@ -16,6 +16,7 @@
 #include "includes/photo-filter/sepia.hpp"
 #include "includes/photo-filter/splash.hpp"
 #include "includes/photo-filter/oil-paint.hpp"
+#include "includes/photo-filter/white-balance.hpp"
 
 //ohayou preset
 #include "includes/preset/summer.hpp"
@@ -25,24 +26,26 @@ using namespace cv;
 using namespace std;
 const int slider_max = 100;
 int slider = 1;
-Mat src1;
+Mat img;
 
 void on_trackbar(int x, void *data)
 {
     int val = x;
-    // Mat output_image = ohayou::average_blur(src1, 9);
-    // Mat output_image = ohayou::gaussian_blur(src1, 9);
-    // Mat output_image = ohayou::horizontal_motion_blur(src1, val);
-    // Mat output_image = ohayou::apply_sepia(src1, val/100.0);
-    // Mat output_image = ohayou::apply_splash(src1,
+    // Mat output_image = ohayou::average_blur(img, 9);
+    // Mat output_image = ohayou::gaussian_blur(img, 9);
+    // Mat output_image = ohayou::horizontal_motion_blur(img, val);
+    // Mat output_image = ohayou::apply_sepia(img, val/100.0);
+    // Mat output_image = ohayou::apply_splash(img,
     //                                         cv::Scalar(155, 30, 30),
     //                                         cv::Scalar(315, 255, 255));
 
-    //Mat output_image = ohayou::apply_duo_tone(src1, 1, 1 + val / 100.0);
+    //Mat output_image = ohayou::apply_duo_tone(img, 1, 1 + val / 100.0);
     //Mat output_image = ohayou::horizontal_motion_blur(img, val);
-    //Mat output_image = ohayou::apply_brightness(src1, val / 2.0);
-    //Mat output_image = ohayou::apply_summer(src1);
-    Mat output_image = ohayou::apply_oil_paint(src1, val);
+    //Mat output_image = ohayou::apply_brightness(img, val / 2.0);
+    // Mat output_image = ohayou::apply_summer(img);
+    //Mat output_image = ohayou::apply_oil_paint(img, val);
+    Mat output_image = ohayou::apply_white_balance(img, val/100.0);
+
     imshow("image", output_image);
 }
 
@@ -58,17 +61,18 @@ void execute(Mat& img)
 }
 
 int main(int argc, char *argv[]){
-    std::string image_path = samples::findFile("/Users/john/Downloads/shinigami.jpg");
-    Mat img = imread(image_path, IMREAD_COLOR);
-    if(img.empty()){
+    std::string image_path = samples::findFile("/Users/john/Downloads/lion.jpg");
+    Mat image = imread(image_path, IMREAD_COLOR);
+    if (image.empty())
+    {
         std::cout << "Could not read the image: " << image_path << std::endl;
         return 1;
     }
 
     // imshow("Display window", output_image);
     // (void) waitKey(0); // Wait for a keystroke in the window
-    src1 = img;
-    execute(img);
+    img = image;
+    execute(image);
 
     return 0;
 }

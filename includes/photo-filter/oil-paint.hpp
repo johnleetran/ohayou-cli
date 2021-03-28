@@ -9,7 +9,7 @@ using namespace cv;
 using namespace std;
 namespace ohayou
 {
-    cv::Mat apply_oil_paint(Mat img, int size)
+    cv::Mat apply_oil_paint(Mat img, int size = 10)
     {
         cv::Mat output_img;
         xphoto::oilPainting(img, output_img, size, 1, cv::COLOR_BGR2Lab);
