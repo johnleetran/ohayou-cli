@@ -20,7 +20,7 @@ namespace ohayou
         return img;
     }
 
-    cv::Mat apply_brightness(Mat img, float intensity = 1.0)
+    cv::Mat apply_brightness_fancy(Mat img, float intensity)
     {
         cv::Mat hsv_img;
         cv::cvtColor(img, hsv_img, cv::COLOR_BGR2HSV);
@@ -33,6 +33,13 @@ namespace ohayou
         cv::Mat output_img;
         cv::merge(channels, 3, output_img);
         cv::cvtColor(output_img, output_img, cv::COLOR_HSV2BGR);
+        return output_img;
+    }
+
+    cv::Mat apply_brightness(Mat img, float level)
+    {
+        cv::Mat output_img;
+        cv::convertScaleAbs(img, output_img, 1.0, level);
         return output_img;
     }
 };

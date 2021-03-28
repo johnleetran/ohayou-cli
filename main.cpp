@@ -15,6 +15,7 @@
 #include "includes/photo-filter/duo-tone.hpp"
 #include "includes/photo-filter/sepia.hpp"
 #include "includes/photo-filter/splash.hpp"
+#include "includes/photo-filter/oil-paint.hpp"
 
 //ohayou preset
 #include "includes/preset/summer.hpp"
@@ -39,9 +40,9 @@ void on_trackbar(int x, void *data)
 
     //Mat output_image = ohayou::apply_duo_tone(src1, 1, 1 + val / 100.0);
     //Mat output_image = ohayou::horizontal_motion_blur(img, val);
-    //Mat output_image = ohayou::apply_brightness(src1, val / 15.0);
-    Mat output_image = ohayou::apply_summer(src1);
-
+    //Mat output_image = ohayou::apply_brightness(src1, val / 2.0);
+    //Mat output_image = ohayou::apply_summer(src1);
+    Mat output_image = ohayou::apply_oil_paint(src1, val);
     imshow("image", output_image);
 }
 
