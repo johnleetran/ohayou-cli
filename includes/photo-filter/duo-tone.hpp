@@ -22,17 +22,17 @@ namespace ohayou
 
     cv::Mat tone(Mat img, int number, float exp)
     {
-        Mat planes[3];
-        cv::split(img, planes);
+        Mat channels[3];
+        cv::split(img, channels);
         for(int i=0; i<3; i++){
             if(i == number){
-                planes[i] = exponential_function(planes[i], exp);
+                channels[i] = exponential_function(channels[i], exp);
             }else{
-                planes[i] *= 0;
+                channels[i] *= 0;
             }
         }
         Mat out;
-        cv::merge(planes, 3, out);
+        cv::merge(channels, 3, out);
         return out;
     }
 
