@@ -19,6 +19,7 @@ namespace ohayou
         return std::move(hsv);
     }
 
+    //In Opencv their maximum values of Hue range from 0–180 and of Saturation and Brightness from 0–255
     cv::Mat apply_splash(Mat img, cv::Scalar lower_bound, cv::Scalar upper_bound)
     {
         cv::Mat mask = getSplashMask(img, lower_bound, upper_bound);

@@ -17,15 +17,22 @@
 
 using namespace cv;
 using namespace std;
+const int slider_max = 100;
+int slider = 3;
+Mat src1;
 
-int main(int argc, char *argv[]){
-    std::string image_path = samples::findFile("/Users/john/Downloads/lion.jpg");
-    Mat img = imread(image_path, IMREAD_COLOR);
-    if(img.empty()){
-        std::cout << "Could not read the image: " << image_path << std::endl;
-        return 1;
-    }
+void on_trackbar(int x, void *data)
+{
+    Mat dst = ohayou::horizontal_motion_blur(src1, x);
+    imshow("image", dst);
+}
 
+void brightness(Mat& img)
+{
+    cv::namedWindow("image");
+    cv::createTrackbar("val", "image", &slider, slider_max, on_trackbar);
+
+    float val = cv::getTrackbarPos("val", "image");
     // Mat output_image = ohayou::average_blur(img, 9);
     // Mat output_image = ohayou::gaussian_blur(img, 9);
     // Mat output_image = ohayou::horizontal_motion_blur(img, 21);
@@ -34,10 +41,26 @@ int main(int argc, char *argv[]){
     //                                         cv::Scalar(155, 30, 30),
     //                                         cv::Scalar(315, 255, 255));
 
-    //second parameter to 0 for blue, 1 for green and 2 for red screen
-    Mat output_image = ohayou::apply_duo_tone(img, 1, 1.05);
-    imshow("Display window", output_image);
-    (void) waitKey(0); // Wait for a keystroke in the window
+    // Mat output_image = ohayou::apply_duo_tone(img, 1, 1.05);
+    Mat output_image = ohayou::horizontal_motion_blur(img, val);
+
+    on_trackbar(val, 0);
+
+    cv::waitKey(0);
+}
+
+int main(int argc, char *argv[]){
+    std::string image_path = samples::findFile("/Users/john/Downloads/shinigami.jpg");
+    Mat img = imread(image_path, IMREAD_COLOR);
+    if(img.empty()){
+        std::cout << "Could not read the image: " << image_path << std::endl;
+        return 1;
+    }
+
+    // imshow("Display window", output_image);
+    // (void) waitKey(0); // Wait for a keystroke in the window
+    src1 = img;
+    brightness(img);
 
     return 0;
 }
