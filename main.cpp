@@ -61,7 +61,8 @@ void execute(Mat& img)
 }
 
 int main(int argc, char *argv[]){
-    std::string image_path = samples::findFile("/Users/john/Downloads/lion.jpg");
+    std::string file_path = argv[1];
+    std::string image_path = samples::findFile(file_path);
     Mat image = imread(image_path, IMREAD_COLOR);
     if (image.empty())
     {
