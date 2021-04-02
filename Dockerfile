@@ -27,6 +27,10 @@ RUN ./bootstrap-vcpkg.sh
 RUN ./vcpkg install harfbuzz
 RUN ./vcpkg install opencv4[contrib]
 
+#build libvips
+# RUN apt-get -y install build-essential pkg-config libglib2.0-dev libexpat1-dev libtiff5-dev libjpeg-turbo8-dev libgsf-1-dev 
+
+
 #ohayou
 WORKDIR /ohayou
 ADD . .
