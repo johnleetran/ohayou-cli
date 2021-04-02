@@ -34,7 +34,7 @@ void on_trackbar(int x, void *data)
     // Mat output_image = ohayou::average_blur(img, 9);
     // Mat output_image = ohayou::gaussian_blur(img, 9);
     // Mat output_image = ohayou::horizontal_motion_blur(img, val);
-    // Mat output_image = ohayou::apply_sepia(img, val/100.0);
+    Mat output_image = ohayou::apply_sepia(img, val/100.0);
     // Mat output_image = ohayou::apply_splash(img,
     //                                         cv::Scalar(155, 30, 30),
     //                                         cv::Scalar(315, 255, 255));
@@ -42,9 +42,9 @@ void on_trackbar(int x, void *data)
     //Mat output_image = ohayou::apply_duo_tone(img, 1, 1 + val / 100.0);
     //Mat output_image = ohayou::horizontal_motion_blur(img, val);
     //Mat output_image = ohayou::apply_brightness(img, val / 2.0);
-    // Mat output_image = ohayou::apply_summer(img);
+    //Mat output_image = ohayou::apply_summer(img);
     //Mat output_image = ohayou::apply_oil_paint(img, val);
-    Mat output_image = ohayou::apply_white_balance(img, val/100.0);
+    //Mat output_image = ohayou::apply_white_balance(img, val/100.0);
 
     imshow("image", output_image);
 }
@@ -69,12 +69,12 @@ int main(int argc, char *argv[]){
         std::cout << "Could not read the image: " << image_path << std::endl;
         return 1;
     }
-
+    Mat output_image = ohayou::apply_sepia(image, 1.0);
+    cv::imwrite("./out.jpg", output_image);
     // imshow("Display window", output_image);
     // (void) waitKey(0); // Wait for a keystroke in the window
-    img = image;
-    execute(image);
-
+    //img = image;
+    //execute(image);
     return 0;
 }
 
