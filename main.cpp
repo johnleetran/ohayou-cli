@@ -18,12 +18,12 @@
 #include "includes/photo-filter/oil-paint.hpp"
 #include "includes/photo-filter/white-balance.hpp"
 
+// command-line-parser
+#include "includes/command-line-parser/CLI11.hh"
+
 //ohayou preset
 #include "includes/preset/summer.hpp"
 
-// libvips
-#include <vips/vips8>
-using namespace vips;
 
 using namespace cv;
 using namespace std;
@@ -37,7 +37,7 @@ void on_trackbar(int x, void *data)
     // Mat output_image = ohayou::average_blur(img, 9);
     // Mat output_image = ohayou::gaussian_blur(img, 9);
     // Mat output_image = ohayou::horizontal_motion_blur(img, val);
-    Mat output_image = ohayou::apply_sepia(img, val/100.0);
+    // Mat output_image = ohayou::apply_sepia(img, val/100.0);
     // Mat output_image = ohayou::apply_splash(img,
     //                                         cv::Scalar(155, 30, 30),
     //                                         cv::Scalar(315, 255, 255));
@@ -49,7 +49,7 @@ void on_trackbar(int x, void *data)
     //Mat output_image = ohayou::apply_oil_paint(img, val);
     //Mat output_image = ohayou::apply_white_balance(img, val/100.0);
 
-    imshow("image", output_image);
+    // imshow("image", output_image);
 }
 
 void execute(Mat& img)
@@ -63,53 +63,46 @@ void execute(Mat& img)
     cv::waitKey(0);
 }
 
-int doVips(int argc, char **argv)
-{
-    if (VIPS_INIT(argv[0]))
-        vips_error_exit(NULL);
-
-    if (argc != 3)
-        vips_error_exit("usage: %s input-file output-file", argv[0]);
-
-    VImage in = VImage::new_from_file(argv[1],
-                                      VImage::option()->set("access", VIPS_ACCESS_SEQUENTIAL));
-
-    double avg = in.avg();
-
-    printf("avg = %g\n", avg);
-    printf("width = %d\n", in.width());
-
-    in = VImage::new_from_file(argv[1],
-                               VImage::option()->set("access", VIPS_ACCESS_SEQUENTIAL));
-
-    VImage out = in.embed(0, 0, 1000, 1000,
-                          VImage::option()->set("extend", "background")->set("background", 128));
-
-    std::vector<double> ink = {0.0};
-    out.draw_line(ink, 0, 0, 1000, 1000);
-    out.write_to_file(argv[2]);
-
-    vips_shutdown();
-
-    return (0);
-}
-
 int main(int argc, char *argv[]){
-    std::string file_path = argv[1];
-    std::string image_path = samples::findFile(file_path);
-    Mat image = imread(image_path, IMREAD_COLOR);
-    if (image.empty())
-    {
-        std::cout << "Could not read the image: " << image_path << std::endl;
-        return 1;
-    }
-    Mat output_image = ohayou::apply_sepia(image, 1.0);
-    cv::imwrite("./out.jpg", output_image);
+    CLI::App app{"Ohayou-cli - useless imaging CLI that shows off cool effects"};
 
-    doVips(argc, argv);
-    // imshow("Display window", output_image);
-    // (void) waitKey(0); // Wait for a keystroke in the window
-    //img = image;
+    std::string input_filename = "input.jpg";
+    std::string output_filename = "output.jpg";
+    int blur_amount = 1;
+
+    CLI::App *blur_cmd = app.add_subcommand("blur", "applies blur on the input image");
+    blur_cmd->add_option("-i,--input", input_filename, "the path to the input image")->required();
+    blur_cmd->add_option("-o,--output", output_filename, "the path to where you want to save the output");
+    blur_cmd->add_option("-a,--amount", blur_amount, "how much to blur the image")->required();
+    blur_cmd->add_subcommand("average");
+    blur_cmd->add_subcommand("gaussian");
+    blur_cmd->add_subcommand("motion");
+
+    CLI11_PARSE(app, argc, argv);
+
+    std::string image_path = samples::findFile(input_filename);
+    Mat image = imread(image_path, IMREAD_COLOR);
+
+    if (app.got_subcommand(blur_cmd)){
+        Mat output_image;
+        if (blur_cmd->got_subcommand("average")){
+            output_image = ohayou::average_blur(image, blur_amount);
+        }
+        else if (blur_cmd->got_subcommand("gaussian")){
+            output_image = ohayou::gaussian_blur(image, blur_amount);
+        }
+        else{
+            output_image = ohayou::horizontal_motion_blur(image, blur_amount);
+        }
+        imshow("image", output_image);
+        cv::waitKey(0);
+    }
+
+    // std::string file_path = argv[1];
+    // std::string image_path = samples::findFile(file_path);
+    // Mat image = imread(image_path, IMREAD_COLOR);
+
+    // img = image;
     //execute(image);
     return 0;
 }
