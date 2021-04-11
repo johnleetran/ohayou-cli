@@ -30,6 +30,9 @@ using namespace cv;
 using namespace std;
 const int slider_max = 100;
 int slider = 1;
+Mat gImage;
+Point startROI;
+Point endROI;
 
 void on_trackbar(int x, void *data)
 {
@@ -241,6 +244,12 @@ void reduce(Mat &image, vector<int> path)
         Mat lower = image.rowRange(i, i + 1).colRange(0, path[i]);
         Mat upper = image.rowRange(i, i + 1).colRange(path[i] + 1, colsize);
 
+        if (path[i] >= startROI.x && path[i] <= endROI.x && i >= startROI.y && i<= endROI.y)
+        {
+            startROI.x += 1;
+            endROI.x -= 1;
+        }
+
         // merge the two subrows and dummy matrix/pixel into a full row
         if (!lower.empty() && !upper.empty())
         {
@@ -273,22 +282,56 @@ Mat seam_carving(Mat img)
     {
 
         Mat energy_image = energy_function(img);
+        cv::rectangle(energy_image, startROI, endROI, cv::Scalar(255, 255, 255), -1);
+
         Mat interminate_energy_image = energy_function_refinement(energy_image);
         vector<int> path = get_seam(interminate_energy_image);
         showPath(energy_image, path, "Cur Iter: " + std::to_string(i + 1) + "/" + std::to_string(iterations));
         reduce(img, path);
+
     }
     return img;
 }
+
+void draw_roi(int event, int x, int y, int f, void *)
+{
+    switch(event){
+    case cv::EVENT_LBUTTONDOWN:
+        std::cout << "HOLD x: " << x << std::endl;
+        std::cout << "HOLD y: " << y << std::endl;
+        std::cout << "HOLD f: " << f << std::endl;
+        startROI.x = x;
+        startROI.y = y;
+    case cv::EVENT_LBUTTONUP:
+        std::cout << "Release x: " << x << std::endl;
+        std::cout << "Release y: " << y << std::endl;
+        std::cout << "Release f: " << f << std::endl;
+        endROI.x = x;
+        endROI.y = y;
+        //cv::rectangle(gImage, startROI, endROI, cv::Scalar(0, 255, 0), -1); break;
+    default:
+        break;
+    }
+}
+
 
 int main(int argc, char *argv[]){
 
     std::string file_path = argv[1];
     std::string image_path = samples::findFile(file_path);
-    Mat img = imread(image_path, IMREAD_COLOR);
+    gImage = imread(image_path, IMREAD_COLOR);
+    Mat img = gImage.clone();
+
+    //allow user to draw region of interest
+    std::string window_name = "main window";
+    cv::namedWindow(window_name, WINDOW_NORMAL);
+    cv::imshow(window_name, img);
+    cv::setMouseCallback(window_name, draw_roi, NULL);
+    cv::waitKey(0);
+
     Mat output_image = seam_carving(img);
     cv::imshow("output_image", output_image);
     cv::waitKey(0);
+
     return 0;
 }
-

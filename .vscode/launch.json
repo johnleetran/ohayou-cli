@@ -10,8 +10,8 @@
             "name": "Run App Debug",
             "program": "${workspaceFolder}/build/ohayou-cli",
             "args": [
-                "/Users/john/Downloads/Car-Driving-Stock-Footage.mp4",
-                "${workspaceFolder}/images/shinigami.jpg"
+                //"/Users/john/Downloads/Car-Driving-Stock-Footage.mp4",
+                "${workspaceFolder}/assets/images/shinigami-small.jpg"
             ],
             "cwd": "${workspaceFolder}/build",
             "preLaunchTask": "Build Debug"
