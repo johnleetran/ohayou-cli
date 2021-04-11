@@ -244,12 +244,6 @@ void reduce(Mat &image, vector<int> path)
         Mat lower = image.rowRange(i, i + 1).colRange(0, path[i]);
         Mat upper = image.rowRange(i, i + 1).colRange(path[i] + 1, colsize);
 
-        if (path[i] >= startROI.x && path[i] <= endROI.x && i >= startROI.y && i<= endROI.y)
-        {
-            startROI.x += 1;
-            endROI.x -= 1;
-        }
-
         // merge the two subrows and dummy matrix/pixel into a full row
         if (!lower.empty() && !upper.empty())
         {
@@ -269,6 +263,11 @@ void reduce(Mat &image, vector<int> path)
         }
         // take the newly formed row and place it into the original image
         new_row.copyTo(image.row(i));
+    }
+    if (path[0] <= startROI.x && startROI.x - 1 > 0)
+    {
+        startROI.x -= 1;
+        endROI.x -= 1;
     }
     // clip the right-most side of the image
     image = image.colRange(0, colsize - 1);
@@ -320,6 +319,9 @@ int main(int argc, char *argv[]){
     std::string file_path = argv[1];
     std::string image_path = samples::findFile(file_path);
     gImage = imread(image_path, IMREAD_COLOR);
+    int new_width = 500;
+    int new_height = ( (new_width * 1.0) / (gImage.rows * 1.0)) * gImage.cols;
+    cv::resize(gImage, gImage, cv::Size(new_height, new_width));
     Mat img = gImage.clone();
 
     //allow user to draw region of interest
@@ -332,6 +334,6 @@ int main(int argc, char *argv[]){
     Mat output_image = seam_carving(img);
     cv::imshow("output_image", output_image);
     cv::waitKey(0);
-
+    cv::imwrite("./output.jpg", output_image);
     return 0;
 }
