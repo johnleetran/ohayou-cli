@@ -57,9 +57,10 @@ cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=/Users/john/Documents/code/cpp/vcpkg/script
 * some special effects filter like wind, pinch, or spin
 * refactor ui that adjusts HSV with sliders 
 * libvips integration - create prymaid for zooming
-* dockerfile
 * how to stream video from a docker container
 * seam carving
+* content aware fill using seam carving
+* intergrate eigen lib
 
 docker run -it --rm --device=/dev/video0 -e DISPLAY=$DISPLAY -v $XSOCK:$XSOCK -v $XAUTH:$XAUTH -e XAUTHORITY=$XAUTH
 
