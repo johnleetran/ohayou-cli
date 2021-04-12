@@ -43,6 +43,18 @@ make install
 #example to link with vips "g++ -g -Wall example.cc `pkg-config vips-cpp --cflags --libs`"
 ```
 
+# Super resolution models can be found here
+
+## models
+https://github.com/Saafke/EDSR_Tensorflow/tree/master/models
+https://github.com/fannymonori/TF-ESPCN/tree/master/export
+https://github.com/Saafke/FSRCNN_Tensorflow/tree/master/models
+https://github.com/fannymonori/TF-LapSRN/tree/master/export
+
+## tutorils
+https://learnopencv.com/super-resolution-in-opencv/
+https://towardsdatascience.com/deep-learning-based-super-resolution-with-opencv-4fd736678066
+
 ```
 ln -s /usr/local/Cellar/harfbuzz/2.8.0  /usr/local/Cellar/harfbuzz/2.7.4
 mkdir build
