@@ -5,6 +5,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/dnn_superres.hpp>
 
 //ohayou blurs
 #include "includes/blur/gaussian.hpp"
@@ -27,40 +28,14 @@
 
 using namespace cv;
 using namespace std;
-const int slider_max = 50;
+const int slider_max = 100;
 int slider = 1;
 Mat gImage;
 
 void on_trackbar(int x, void *data)
 {
     int val = x;
-    if(val != 0){
-        int scale = 1;
-        int saturation = val;
-        Mat output_image, saturated;
-        Mat gray, gray_blur, mask;
-        Mat color_blur_output;
-        Mat hsv_img_channels[3], hsv_img;
-        cv::cvtColor(gImage, gray, cv::COLOR_BGR2GRAY);
-        cv::medianBlur(gray, gray_blur, 5);
-        cv::adaptiveThreshold(gray_blur, mask, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 5);
-
-        cv::bilateralFilter(gImage, color_blur_output, 9, 200, 200);
-
-        cv::bitwise_and(gImage, color_blur_output, output_image, mask);
-        cv::cvtColor(output_image, output_image, cv::COLOR_BGR2HSV);
-        cv::split(output_image, hsv_img_channels);
-        hsv_img_channels[1] *= saturation * 0.5;
-        cv::merge(hsv_img_channels, 3, hsv_img);
-
-        cv::cvtColor(hsv_img, output_image, cv::COLOR_HSV2BGR);
-        imshow("image", output_image);
-
-        // s = s *satadj
-        //     s = np.clip(s, 0, 255)
-        //             imghsv = cv2.merge([ h, s, v ])
-        //                          
-    }
+    // Mat output_image = ohayou::average_blur(img, 9);
     // Mat output_image = ohayou::gaussian_blur(img, 9);
     // Mat output_image = ohayou::horizontal_motion_blur(img, val);
     // Mat output_image = ohayou::apply_sepia(img, val/100.0);
@@ -75,27 +50,39 @@ void on_trackbar(int x, void *data)
     //Mat output_image = ohayou::apply_oil_paint(img, val);
     //Mat output_image = ohayou::apply_white_balance(img, val/100.0);
 
+    // imshow("image", output_image);
 }
 
-void execute(Mat &img)
+void execute(Mat& img)
 {
     cv::namedWindow("image");
     cv::createTrackbar("val", "image", &slider, slider_max, on_trackbar);
 
     float val = cv::getTrackbarPos("val", "image");
-    gImage= img;
     on_trackbar(val, 0);
 
     cv::waitKey(0);
 }
 
-int main(int argc, char *argv[])
-{
+
+int main(int argc, char *argv[]){
+
     std::string file_path = argv[1];
     std::string image_path = samples::findFile(file_path);
     Mat img = imread(image_path, IMREAD_COLOR);
+    cv::dnn_superres::DnnSuperResImpl sr;
+    string model_path = "/Users/john/Documents/code/imaging/opencv-code/ohayou-cli/models/super-resolution/EDSR_x4.pb";
 
-    execute(img);
+    sr.readModel(model_path);
 
+    //Set the desired model and scale to get correct pre- and post-processing
+    sr.setModel("edsr", 4);
+
+    //Upscale
+    Mat img_new;
+    sr.upsample(img, img_new);
+    cv::imwrite("upscaled.png", img_new);
+    imshow("result", img_new);
+    waitKey(0);
     return 0;
 }

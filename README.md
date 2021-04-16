@@ -70,7 +70,6 @@ cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=/Users/john/Documents/code/cpp/vcpkg/script
 * refactor ui that adjusts HSV with sliders 
 * libvips integration - create prymaid for zooming
 * how to stream video from a docker container
-* seam carving
 * content aware fill using seam carving
 * intergrate eigen lib
 

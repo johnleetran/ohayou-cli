@@ -27,40 +27,16 @@
 
 using namespace cv;
 using namespace std;
-const int slider_max = 50;
+const int slider_max = 100;
 int slider = 1;
 Mat gImage;
+Point startROI;
+Point endROI;
 
 void on_trackbar(int x, void *data)
 {
     int val = x;
-    if(val != 0){
-        int scale = 1;
-        int saturation = val;
-        Mat output_image, saturated;
-        Mat gray, gray_blur, mask;
-        Mat color_blur_output;
-        Mat hsv_img_channels[3], hsv_img;
-        cv::cvtColor(gImage, gray, cv::COLOR_BGR2GRAY);
-        cv::medianBlur(gray, gray_blur, 5);
-        cv::adaptiveThreshold(gray_blur, mask, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 5);
-
-        cv::bilateralFilter(gImage, color_blur_output, 9, 200, 200);
-
-        cv::bitwise_and(gImage, color_blur_output, output_image, mask);
-        cv::cvtColor(output_image, output_image, cv::COLOR_BGR2HSV);
-        cv::split(output_image, hsv_img_channels);
-        hsv_img_channels[1] *= saturation * 0.5;
-        cv::merge(hsv_img_channels, 3, hsv_img);
-
-        cv::cvtColor(hsv_img, output_image, cv::COLOR_HSV2BGR);
-        imshow("image", output_image);
-
-        // s = s *satadj
-        //     s = np.clip(s, 0, 255)
-        //             imghsv = cv2.merge([ h, s, v ])
-        //                          
-    }
+    // Mat output_image = ohayou::average_blur(img, 9);
     // Mat output_image = ohayou::gaussian_blur(img, 9);
     // Mat output_image = ohayou::horizontal_motion_blur(img, val);
     // Mat output_image = ohayou::apply_sepia(img, val/100.0);
@@ -75,6 +51,7 @@ void on_trackbar(int x, void *data)
     //Mat output_image = ohayou::apply_oil_paint(img, val);
     //Mat output_image = ohayou::apply_white_balance(img, val/100.0);
 
+    // imshow("image", output_image);
 }
 
 void execute(Mat &img)
@@ -83,19 +60,54 @@ void execute(Mat &img)
     cv::createTrackbar("val", "image", &slider, slider_max, on_trackbar);
 
     float val = cv::getTrackbarPos("val", "image");
-    gImage= img;
     on_trackbar(val, 0);
 
     cv::waitKey(0);
 }
 
+int blur_command(int argc, char *argv[])
+{
+    CLI::App app{"Ohayou-cli - useless imaging CLI that shows off cool effects"};
+
+    std::string input_filename = "input.jpg";
+    std::string output_filename = "output.jpg";
+    int blur_amount = 1;
+
+    CLI::App *blur_cmd = app.add_subcommand("blur", "applies blur on the input image");
+    blur_cmd->add_option("-i,--input", input_filename, "the path to the input image")->required();
+    blur_cmd->add_option("-o,--output", output_filename, "the path to where you want to save the output");
+    blur_cmd->add_option("-a,--amount", blur_amount, "how much to blur the image")->required();
+    blur_cmd->add_subcommand("average");
+    blur_cmd->add_subcommand("gaussian");
+    blur_cmd->add_subcommand("motion");
+
+    CLI11_PARSE(app, argc, argv);
+
+    std::string image_path = samples::findFile(input_filename);
+    Mat image = imread(image_path, IMREAD_COLOR);
+
+    if (app.got_subcommand(blur_cmd))
+    {
+        Mat output_image;
+        if (blur_cmd->got_subcommand("average"))
+        {
+            output_image = ohayou::average_blur(image, blur_amount);
+        }
+        else if (blur_cmd->got_subcommand("gaussian"))
+        {
+            output_image = ohayou::gaussian_blur(image, blur_amount);
+        }
+        else
+        {
+            output_image = ohayou::horizontal_motion_blur(image, blur_amount);
+        }
+        imshow("output_image", output_image);
+        cv::waitKey(0);
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
-    std::string file_path = argv[1];
-    std::string image_path = samples::findFile(file_path);
-    Mat img = imread(image_path, IMREAD_COLOR);
-
-    execute(img);
-
-    return 0;
+    return blur_command(argc, argv);
 }
