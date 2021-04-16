@@ -63,7 +63,6 @@ cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=/Users/john/Documents/code/cpp/vcpkg/script
 ```
 
 ## TODO
-* cartooning
 * emboss
 * pencil sketch
 * some special effects filter like wind, pinch, or spin
