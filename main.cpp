@@ -29,18 +29,22 @@ using namespace cv;
 using namespace std;
 const int slider_max = 255;
 int slider = 0;
-Mat gImage, gImposeImg, gDepthImg;
+int gCurrentSlider = slider;
+Mat gImage, gDepthImg, gImposeImg;
+Point gImposeImagePosition;
+std::string gWindowName = "image";
+void update_impose_position(int event, int x, int y, int f, void *);
 
-void on_trackbar(int x, void *data)
-{
-    int val = x;
+void render(){
+    int val = gCurrentSlider;
     Mat output_image;
     Mat src_img = gImage;
     Mat result = src_img.clone();
-    Mat impose_img = gImposeImg;
     Mat depth_img = gDepthImg;
-    int startRow = 223;
-    int startCol = 288;
+    Mat impose_img = gImposeImg;
+
+    int startRow = gImposeImagePosition.y;
+    int startCol = gImposeImagePosition.x;
     for(int row = 0; row < impose_img.rows; row++){
         for(int col = 0; col < impose_img.cols; col++){
             int c = col+startCol;
@@ -55,40 +59,65 @@ void on_trackbar(int x, void *data)
             }
         }
     }
-
     // show result
     imshow("image", result);
+    cv::setMouseCallback(gWindowName, update_impose_position, NULL);
 }
 
-void execute(Mat &src_img,  Mat &impose_img, Mat &depth_img)
+void on_trackbar(int x, void *data)
 {
-    cv::namedWindow("image");
-    cv::createTrackbar("val", "image", &slider, slider_max, on_trackbar);
+    gCurrentSlider = x;
+    render();
 
-    float val = cv::getTrackbarPos("val", "image");
+
+}
+
+void execute(Mat &src_img,  Mat &depth_img, Mat &impose_img)
+{
+    cv::namedWindow(gWindowName);
+    cv::createTrackbar("val", gWindowName, &slider, slider_max, on_trackbar);
+
+    float val = cv::getTrackbarPos("val", gWindowName);
     gImage = src_img;
-    gImposeImg = impose_img;
     gDepthImg = depth_img;
+    gImposeImg = impose_img;
     on_trackbar(val, 0);
 
     cv::waitKey(0);
 }
 
+void update_impose_position(int event, int x, int y, int f, void *)
+{
+    switch (event)
+    {
+    case cv::EVENT_LBUTTONDOWN:
+        std::cout << "Release x: " << x << std::endl;
+        std::cout << "Release y: " << y << std::endl;
+        std::cout << "Release f: " << f << std::endl;
+        gImposeImagePosition.x = x;
+        gImposeImagePosition.y = y;
+        //cv::rectangle(gImage, startROI, endROI, cv::Scalar(0, 255, 0), -1); break;
+    default:
+        break;
+    }
+    render();
+}
+
 int main(int argc, char *argv[])
 {
     std::string src_arg = argv[1];
-    std::string impose_arg = argv[2];
-    std::string depth_arg = argv[3];
+    std::string depth_arg = argv[2];
+    std::string impose_arg = argv[3];
 
     std::string src_path = samples::findFile(src_arg);
-    std::string impose_path = samples::findFile(impose_arg);
     std::string depth_path = samples::findFile(depth_arg);
+    std::string impose_path = samples::findFile(impose_arg);
 
-    Mat src_img = imread(src_path, cv::IMREAD_UNCHANGED);
-    Mat impose_img = imread(impose_path, cv::IMREAD_COLOR);
+    Mat src_img = imread(src_path, cv::IMREAD_COLOR);
     Mat depth_img = imread(depth_path, cv::IMREAD_GRAYSCALE);
+    Mat impose_img = imread(impose_path, cv::IMREAD_COLOR);
 
-    execute(src_img, impose_img, depth_img);
+    execute(src_img, depth_img, impose_img);
 
     return 0;
 }
