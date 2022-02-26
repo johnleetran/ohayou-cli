@@ -27,60 +27,48 @@
 
 using namespace cv;
 using namespace std;
-const int slider_max = 1000;
-int slider = 1;
-Mat gImage, gSaturationImg, gVibranceImg;
+const int slider_max = 255;
+int slider = 0;
+Mat gImage, gImposeImg, gDepthImg;
 
 void on_trackbar(int x, void *data)
 {
     int val = x;
     Mat output_image;
-    Mat result;
-    Mat img = gImage;
-    const double exponential_e = std::exp(1.0);
-    // Create Look-up table for color curve effect
-    Mat lut(1, 256, CV_8UC1);
-    for (int i = 0; i < 256; i++)
-    {
-        float x = (float)i / 256.0;
-        lut.at<uchar>(i) = cvRound(256 * (1 / (1 + pow(exponential_e, -((x - 0.5) / 0.1)))));
+    Mat src_img = gImage;
+    Mat result = src_img.clone();
+    Mat impose_img = gImposeImg;
+    Mat depth_img = gDepthImg;
+    int startRow = 223;
+    int startCol = 288;
+    for(int row = 0; row < impose_img.rows; row++){
+        for(int col = 0; col < impose_img.cols; col++){
+            int c = col+startCol;
+            int r = row+startRow;
+            int pixelValue = (int)depth_img.at<uchar>(r, c);
+            if(pixelValue >= val){
+                Vec3b color = impose_img.at<Vec3b>(Point(col, row));
+                result.at<Vec3b>(Point(c,r))[0] = color[0];
+                result.at<Vec3b>(Point(c,r))[1] = color[1];
+                result.at<Vec3b>(Point(c,r))[2] = color[2];
+                // result.at<Vec4b>(Point(c,r))[3] = color[3];
+            }
+        }
     }
-
-    // Split the image channels and apply curve transform only to red channel
-    vector<Mat> bgr;
-    split(img, bgr);
-    LUT(bgr[2], lut, bgr[2]);
-    // merge result
-    merge(bgr, result);
-
-    // Create image for halo dark
-    float halo_val = val / 1000.0;
-    Mat halo(img.rows, img.cols, CV_32FC3, Scalar(halo_val, halo_val, halo_val));
-    // Create circle
-    circle(halo, Point(img.cols / 2, img.rows / 2), img.cols / 3, Scalar(1, 1, 1), -1);
-    blur(halo, halo, Size(img.cols / 3, img.cols / 3));
-
-    // Convert the result to float to allow multiply by 1 factor
-    Mat resultf;
-    result.convertTo(resultf, CV_32FC3);
-
-    // Multiply our result with halo
-    multiply(resultf, halo, resultf);
-
-    // convert to 8 bits
-    resultf.convertTo(result, CV_8UC3);
 
     // show result
     imshow("image", result);
 }
 
-void execute(Mat &img)
+void execute(Mat &src_img,  Mat &impose_img, Mat &depth_img)
 {
     cv::namedWindow("image");
     cv::createTrackbar("val", "image", &slider, slider_max, on_trackbar);
 
     float val = cv::getTrackbarPos("val", "image");
-    gImage = img;
+    gImage = src_img;
+    gImposeImg = impose_img;
+    gDepthImg = depth_img;
     on_trackbar(val, 0);
 
     cv::waitKey(0);
@@ -88,11 +76,19 @@ void execute(Mat &img)
 
 int main(int argc, char *argv[])
 {
-    std::string file_path = argv[1];
-    std::string image_path = samples::findFile(file_path);
-    Mat img = imread(image_path, IMREAD_COLOR);
+    std::string src_arg = argv[1];
+    std::string impose_arg = argv[2];
+    std::string depth_arg = argv[3];
 
-    execute(img);
+    std::string src_path = samples::findFile(src_arg);
+    std::string impose_path = samples::findFile(impose_arg);
+    std::string depth_path = samples::findFile(depth_arg);
+
+    Mat src_img = imread(src_path, cv::IMREAD_UNCHANGED);
+    Mat impose_img = imread(impose_path, cv::IMREAD_COLOR);
+    Mat depth_img = imread(depth_path, cv::IMREAD_GRAYSCALE);
+
+    execute(src_img, impose_img, depth_img);
 
     return 0;
 }
